@@ -24,8 +24,8 @@ This MicroPython code transforms the ESP32 into a DNS mixer, allowing it to hand
 
 ## Requirements
 
-- ESP32 device with MicroPython support
-- Network connectivity between the ESP32 and the devices making DNS requests
+- ESP32 device with MicroPython support. [read more..](setup/esp32.md)
+- Network connectivity between the ESP32 and the devices making DNS requests [read more..](setup/otherdevices.md)
 
 ## Configuration
 
@@ -44,7 +44,7 @@ static_ip = "your_static_ip"
 Modify the list of DNS providers to suit your preferences.
 
 ```python
-dns_providers_ipv4 = ["8.8.8.8", "94.140.14.14", "1.1.1.1", "9.9.9.9"]
+dns_providers_ipv4 = ["9.9.9.9", "149.112.112.112", "1.0.0.1","94.140.14.14", "1.1.1.1", "8.8.8.8"]
 ```
 
 ### LED Pin Configuration
