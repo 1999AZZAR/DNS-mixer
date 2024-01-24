@@ -1,6 +1,6 @@
-# ESP32 DNS Mixer
+# DNS Mixer for esp8266/esp32
 
-Turn your ESP32 into a DNS mixer to provide dynamic DNS resolution using multiple DNS servers. This MicroPython code allows the ESP32 to act as a DNS server, forwarding DNS requests to a randomly selected DNS provider from a predefined list. Additionally, the code includes features such as LED indication for request handling, connection status, and failure conditions.
+Turn your esp8266/esp32 into a DNS mixer to provide dynamic DNS resolution using multiple DNS servers. This MicroPython code allows the esp8266/esp32 to act as a DNS server, forwarding DNS requests to a randomly selected DNS provider from a predefined list. Additionally, the code includes features such as LED indication for request handling, connection status, and failure conditions.
 
 ## Table of Contents
 
@@ -20,12 +20,12 @@ Turn your ESP32 into a DNS mixer to provide dynamic DNS resolution using multipl
 
 ## Introduction
 
-This MicroPython code transforms the ESP32 into a DNS mixer, allowing it to handle DNS requests from connected devices and forward them to randomly selected DNS providers. The code is designed to provide flexibility and support LED indications for debugging purposes.
+This MicroPython code transforms the esp8266/esp32 into a DNS mixer, allowing it to handle DNS requests from connected devices and forward them to randomly selected DNS providers. The code is designed to provide flexibility and support LED indications for debugging purposes.
 
 ## Requirements
 
-- ESP32 device with MicroPython support. [read more..](setup/esp32.md)
-- Network connectivity between the ESP32 and the devices making DNS requests [read more..](setup/otherdevices.md)
+- esp8266/esp32 device with MicroPython support. [read more..](setup/server.md)
+- Network connectivity between the esp8266/esp32 and the devices making DNS requests [read more..](setup/otherdevices.md)
 
 ## Configuration
 
@@ -59,7 +59,7 @@ led_pin = machine.Pin(your_led_pin_number, machine.Pin.OUT)
 
 ### Connecting to WiFi
 
-The code includes a function to connect to WiFi. Ensure the ESP32 is within range of the WiFi network.
+The code includes a function to connect to WiFi. Ensure the esp8266/esp32 is within range of the WiFi network.
 
 ```python
 connect_to_wifi()
