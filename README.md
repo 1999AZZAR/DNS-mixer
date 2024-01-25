@@ -1,6 +1,6 @@
-# DNS Mixer for esp8266/esp32
+# DNS Mixer
 
-Turn your esp8266/esp32 into a DNS mixer to provide dynamic DNS resolution using multiple DNS servers. This MicroPython code allows the esp8266/esp32 to act as a DNS server, forwarding DNS requests to a randomly selected DNS provider from a predefined list. Additionally, the code includes features such as LED indication for request handling, connection status, and failure conditions.
+Welcome to DNS-mixer! This project handles DNS requests and forwards them to multiple DNS providers, ensuring reliability and redundancy in DNS resolution.
 
 ## Table of Contents
 
@@ -9,18 +9,16 @@ Turn your esp8266/esp32 into a DNS mixer to provide dynamic DNS resolution using
 3. [Configuration](#configuration)
     - [WiFi Configuration](#wifi-configuration)
     - [DNS Providers](#dns-providers)
-    - [LED Pin Configuration](#led-pin-configuration)
 4. [Usage](#usage)
     - [Connecting to WiFi](#connecting-to-wifi)
     - [Handling DNS Requests](#handling-dns-requests)
-5. [LED Indications](#led-indications)
-6. [Troubleshooting](#troubleshooting)
-7. [Contributing](#contributing)
-8. [License](#license)
+5. [Troubleshooting](#troubleshooting)
+6. [Contributing](#contributing)
+7. [License](#license)
 
 ## Introduction
 
-This MicroPython code transforms the esp8266/esp32 into a DNS mixer, allowing it to handle DNS requests from connected devices and forward them to randomly selected DNS providers. The code is designed to provide flexibility and support LED indications for debugging purposes.
+DNS-mixer is a Python-based DNS forwarding tool designed to provide flexibility and resilience by dynamically switching between multiple DNS providers. This project aims to offer a reliable DNS resolution mechanism.
 
 ## Requirements
 
@@ -47,14 +45,6 @@ Modify the list of DNS providers to suit your preferences.
 dns_providers_ipv4 = ["9.9.9.9", "149.112.112.112", "1.0.0.1","94.140.14.14", "1.1.1.1", "8.8.8.8"]
 ```
 
-### LED Pin Configuration
-
-Configure the GPIO pin for the LED indicator in the code.
-
-```python
-led_pin = machine.Pin(your_led_pin_number, machine.Pin.OUT)
-```
-
 ## Usage
 
 ### Connecting to WiFi
@@ -72,14 +62,6 @@ The main function `handle_dns_request` is responsible for processing DNS request
 ```python
 handle_dns_request(data, addr)
 ```
-
-## LED Indications
-
-The code uses the onboard LED to provide indications for various events:
-
-- Blink for 0.1 seconds on a new DNS request.
-- Blink for half second on a failed DNS request.
-- Blink three times fast when connected to the router.
 
 ## Troubleshooting
 
