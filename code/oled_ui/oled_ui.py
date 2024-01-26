@@ -2,7 +2,6 @@ import network
 import socket
 import machine
 import time
-from microWebSrv import MicroWebSrv
 from machine import I2C, Pin
 import ssd1306
 
@@ -17,16 +16,7 @@ DNS_PROVIDERS_IPV4 = ["9.9.9.9", "1.1.1.1", "8.8.8.8", "94.140.14.14", "76.76.19
 DEVICE_IDENTIFIER = "DNS-mixer"
 
 # Pin configuration
-LED_PIN = machine.Pin(2, machine.Pin.OUT)
-
-# OLED display configuration
-i2c = I2C(sda=Pin(4), scl=Pin(5))
-oled = ssd1306.SSD1306_I2C(128, 64, i2c)
-
-# Counters
-TOTAL_REQUESTS = 0
-TOTAL_SUCCESS = 0
-TOTAL_REJECT = 0
+LED = machine.Pin(2, machine.Pin.OUT)
 
 # Function to connect to WiFi
 def connect_to_wifi():
@@ -41,14 +31,20 @@ def connect_to_wifi():
 
     print("Connected to WiFi")
 
+    for _ in range(5):
+        LED.value(1)
+        time.sleep(0.2)
+        LED.value(0)
+        time.sleep(0.3)
+
 # Function to handle DNS requests
 def handle_dns_request(data, addr):
     print("Received DNS request from:", addr)
 
     # Blink LED for 0.05 seconds on new request
-    LED_PIN.off()
+    LED.value(1)
     time.sleep(0.05)
-    LED_PIN.on()
+    LED.value(0)
 
     success = False
 
@@ -65,10 +61,10 @@ def handle_dns_request(data, addr):
             response, _ = dns_socket.recvfrom(1024)
             # Forward the DNS response to the original requester
             server_socket.sendto(response, addr)
-            # Blink LED for 0.07 second on success
-            LED_PIN.off()
-            time.sleep(0.07)
-            LED_PIN.on()
+            # Blink LED for 0.02 second on success
+            LED.value(1)
+            time.sleep(0.02)
+            LED.value(0)
             success = True
             break
         except:
@@ -78,42 +74,12 @@ def handle_dns_request(data, addr):
 
     if not success:
         # Blink LED for half second on failure
-        LED_PIN.off()
+        LED.value(1)
         time.sleep(0.5)
-        LED_PIN.on()
+        LED.value(0)
         print("Failed to forward DNS request")
 
     return success
-
-# Initialize MicroWebSrv
-mws = MicroWebSrv(webPath='/www')
-
-# Function to handle HTTP requests
-def http_handler(httpClient, httpResponse):
-    content = """
-    <!DOCTYPE html>
-    <html>
-        <head>
-            <title>DNS Mixer Stats</title>
-        </head>
-        <body>
-            <h1>DNS Mixer Stats</h1>
-            <p>Device Identifier: {0}</p>
-            <p>IP: {1}</p>
-            <p>Total Requests: {2}</p>
-            <p>Success: {3}</p>
-            <p>Reject: {4}</p>
-        </body>
-    </html>
-    """.format(DEVICE_IDENTIFIER, STATIC_IP, TOTAL_REQUESTS, TOTAL_SUCCESS, TOTAL_REJECT)
-
-    httpResponse.WriteResponseOk(headers=None,
-                                 contentType="text/html",
-                                 contentCharset="UTF-8",
-                                 content=content)
-
-# Start the MicroWebSrv
-mws.Start()
 
 # Connect to WiFi
 connect_to_wifi()
@@ -122,27 +88,36 @@ connect_to_wifi()
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 server_socket.bind(("0.0.0.0", 53))
 
+# Initialize the OLED display
+i2c = I2C(sda=Pin(4), scl=Pin(5))
+oled = ssd1306.SSD1306_I2C(128, 64, i2c)
+
+# Initialize counters
+total_requests = 0
+total_success = 0
+total_reject = 0
+
 # Main loop to handle DNS requests
 while True:
     data, addr = server_socket.recvfrom(1024)
     success = handle_dns_request(data, addr)
 
     # Update counters
-    TOTAL_REQUESTS += 1
+    total_requests += 1
     if success:
-        TOTAL_SUCCESS += 1
+        total_success += 1
     else:
-        TOTAL_REJECT += 1
+        total_reject += 1
 
     # Update OLED display with counters and device identifier
     oled.fill(0)
     oled.text(DEVICE_IDENTIFIER, 30, 0, 1)
     oled.text("IP:" + STATIC_IP, 0, 12, 1)
-    oled.text("Total: " + str(TOTAL_REQUESTS), 0, 24, 1)
-    oled.text("Success: " + str(TOTAL_SUCCESS), 0, 36, 1)
-    oled.text("Reject: " + str(TOTAL_REJECT), 0, 48, 1)
+    oled.text("Total: " + str(total_requests), 0, 24, 1)
+    oled.text("Success: " + str(total_success), 0, 36, 1)
+    oled.text("Reject: " + str(total_reject), 0, 48, 1)
     oled.show()
 
-    # Sleep for a short duration to allow the web server and OLED update to handle requests
-    time.sleep(0.1)
+    # Sleep for a short duration to handle requests
+    time.sleep(0.03)
 
