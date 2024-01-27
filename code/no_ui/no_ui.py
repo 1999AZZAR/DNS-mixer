@@ -1,66 +1,51 @@
+# dns.py
+
 import network
 import socket
 import machine
 import time
 
-# Constants
-WIFI_SSID = "bayar"
-WIFI_PASSWORD = "drowssap"
-STATIC_IP = "192.168.8.180"
-DNS_PROVIDERS_IPV4 = ["9.9.9.9", "1.1.1.1", "8.8.8.8", "94.140.14.14", "76.76.19.19", "76.76.2.0", "185.228.168.9",
-                     "208.67.222.222", "80.80.80.80"]
+wifi_ssid = "bayar"
+wifi_password = "drowssap"
+static_ip = "192.168.8.180"
+dns_providers_ipv4 = ["9.9.9.9", "1.1.1.1", "8.8.8.8", "94.140.14.14", "76.76.19.19", "76.76.2.0", "185.228.168.9", "208.67.222.222", "80.80.80.80"]
 
-# Pin configuration
-LED = machine.Pin(2, machine.Pin.OUT)
+device_identifier = "DNS-mixer"
 
-# Function to connect to WiFi
+led_pin = machine.Pin(2, machine.Pin.OUT)
+
 def connect_to_wifi():
     sta_if = network.WLAN(network.STA_IF)
     sta_if.active(True)
-    sta_if.ifconfig((STATIC_IP, "255.255.255.0", "192.168.8.1", "8.8.8.8"))
-    sta_if.connect(WIFI_SSID, WIFI_PASSWORD)
+    sta_if.ifconfig((static_ip, "255.255.255.0", "192.168.8.1", "9.9.9.9"))
+    sta_if.connect(wifi_ssid, wifi_password)
 
     while not sta_if.isconnected():
-        print("Connecting to WiFi...")
         time.sleep(1)
 
-    print("Connected to WiFi")
+    blink(5, 0.3, 0.2)
 
-    for _ in range(5):
-        LED.value(1)
-        time.sleep(0.2)
-        LED.value(0)
-        time.sleep(0.3)
+def blink(num_blinks, on_duration, off_duration):
+    for _ in range(num_blinks):
+        led_pin.off()
+        time.sleep(on_duration)
+        led_pin.on()
+        time.sleep(off_duration)
 
-# Function to handle DNS requests
 def handle_dns_request(data, addr):
-    print("Received DNS request from:", addr)
-
-    # Blink LED for 0.05 seconds on new request
-    LED.value(1)
-    time.sleep(0.05)
-    LED.value(0)
-
     success = False
 
-    # Iterate through each DNS provider and try to resolve using the first one that responds
-    for dns_provider in DNS_PROVIDERS_IPV4:
-        print("Trying DNS provider:", dns_provider)
-
-        # Create a UDP socket to forward the DNS request
+    for dns_provider in dns_providers_ipv4:
         dns_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        dns_socket.settimeout(0.03)
+        dns_socket.settimeout(0.04)
 
         try:
             dns_socket.sendto(data, (dns_provider, 53))
             response, _ = dns_socket.recvfrom(1024)
-            # Forward the DNS response to the original requester
             server_socket.sendto(response, addr)
-            # Blink LED for 0.02 second on success
-            LED.value(1)
-            time.sleep(0.02)
-            LED.value(0)
+            blink(1, 0.07, 0)  # Blink once for success
             success = True
+            print("Success to resolve using DNS provider:", dns_provider)
             break
         except:
             print("Failed to resolve using DNS provider:", dns_provider)
@@ -68,26 +53,15 @@ def handle_dns_request(data, addr):
             dns_socket.close()
 
     if not success:
-        # Blink LED for 0.5 second on failure
-        LED.value(1)
-        time.sleep(0.5)
-        LED.value(0)
-        print("Failed to forward DNS request")
+        blink(1, 0.2, 0)  # Blink once for failure
 
     return success
 
-# Connect to WiFi
 connect_to_wifi()
 
-# Create a UDP socket for DNS
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 server_socket.bind(("0.0.0.0", 53))
 
-# Main loop to handle DNS requests
 while True:
     data, addr = server_socket.recvfrom(1024)
-    handle_dns_request(data, addr)
-
-    # Sleep for a short duration to handle requests
-    time.sleep(0.03)
-
+    success = handle_dns_request(data, addr)
