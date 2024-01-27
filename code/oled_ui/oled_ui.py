@@ -31,20 +31,21 @@ def connect_to_wifi():
 
     print("Connected to WiFi")
 
-    for _ in range(5):
+    blink(5, 0.2, 0.3)  # Blink 5 times with 0.2s on and 0.3s off
+
+# Function to handle LED blinking
+def blink(num_blinks, on_duration, off_duration):
+    for _ in range(num_blinks):
         LED.value(1)
-        time.sleep(0.2)
+        time.sleep(on_duration)
         LED.value(0)
-        time.sleep(0.3)
+        time.sleep(off_duration)
 
 # Function to handle DNS requests
 def handle_dns_request(data, addr):
     print("Received DNS request from:", addr)
 
-    # Blink LED for 0.05 seconds on new request
-    LED.value(1)
-    time.sleep(0.05)
-    LED.value(0)
+    blink(1, 0.05, 0)  # Blink for 0.05s on new request
 
     success = False
 
@@ -61,10 +62,7 @@ def handle_dns_request(data, addr):
             response, _ = dns_socket.recvfrom(1024)
             # Forward the DNS response to the original requester
             server_socket.sendto(response, addr)
-            # Blink LED for 0.02 second on success
-            LED.value(1)
-            time.sleep(0.02)
-            LED.value(0)
+            blink(1, 0.02, 0)  # Blink for 0.02s on success
             success = True
             break
         except:
@@ -73,10 +71,7 @@ def handle_dns_request(data, addr):
             dns_socket.close()
 
     if not success:
-        # Blink LED for half second on failure
-        LED.value(1)
-        time.sleep(0.5)
-        LED.value(0)
+        blink(1, 0.5, 0)  # Blink for 0.5s on failure
         print("Failed to forward DNS request")
 
     return success
@@ -120,4 +115,3 @@ while True:
 
     # Sleep for a short duration to handle requests
     time.sleep(0.03)
-
